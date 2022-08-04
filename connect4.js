@@ -5,11 +5,13 @@
  * board fills (tie)
  */
 
-var WIDTH = 7;
-var HEIGHT = 6;
+const WIDTH = 7;
+const HEIGHT = 6;
 
-var currPlayer = 1; // active player: 1 or 2
-var board = []; // array of rows, each row is array of cells  (board[y][x])
+let currPlayer = 1; // active player: 1 or 2
+const board = []; // array of rows, each row is array of cells  (board[y][x])
+
+const htmlBoard = document.querySelector("#board");
 
 /** makeBoard: create in-JS board structure:
  *    board = array of rows, each row is array of cells  (board[y][x])
@@ -17,29 +19,39 @@ var board = []; // array of rows, each row is array of cells  (board[y][x])
 
 function makeBoard() {
   // TODO: set "board" to empty HEIGHT x WIDTH matrix array
+
+  for(let i = 1; i <= HEIGHT; i++) {
+    board.push(Array.from({length: WIDTH}));
+  }
+
+  return board;
+  
 }
 
 /** makeHtmlBoard: make HTML table and row of column tops. */
 
 function makeHtmlBoard() {
-  // TODO: get "htmlBoard" variable from the item in HTML w/ID of "board"
 
-  // TODO: add comment for this code
-  var top = document.createElement("tr");
+
+
+  //create the top table row with and id of column-top with an event listener that runs the handleClick function
+  const top = document.createElement("tr");
   top.setAttribute("id", "column-top");
   top.addEventListener("click", handleClick);
 
-  for (var x = 0; x < WIDTH; x++) {
-    var headCell = document.createElement("td");
+
+// create a table cell for each element of width on the board with an id of x and append it to the board
+  for (let x = 0; x < WIDTH; x++) {
+    const headCell = document.createElement("td");
     headCell.setAttribute("id", x);
     top.append(headCell);
   }
   htmlBoard.append(top);
 
-  // TODO: add comment for this code
-  for (var y = 0; y < HEIGHT; y++) {
+  // create a row for each element of height on the board and in each row create a table cell for each element of width on the board with an id of the place it is on the grid and append the row with the cells to the board
+  for (let y = 0; y < HEIGHT; y++) {
     const row = document.createElement("tr");
-    for (var x = 0; x < WIDTH; x++) {
+    for (let x = 0; x < WIDTH; x++) {
       const cell = document.createElement("td");
       cell.setAttribute("id", `${y}-${x}`);
       row.append(cell);
@@ -59,22 +71,37 @@ function findSpotForCol(x) {
 
 function placeInTable(y, x) {
   // TODO: make a div and insert into correct table cell
+  const gamePiece = document.createElement("div");
+  gamePiece.setAttribute("class", "piece");
+
+  if(currPlayer = 1) {
+    gamePiece.classList.remove('p2')
+    gamePiece.classList.add('p1')
+  } else {
+    gamePiece.classList.remove('p1');
+    gamePiece.classList.add('p2');
+  }
+  
+  htmlBoard[y][x].append(gamePiece);
+
 }
 
 /** endGame: announce game end */
 
 function endGame(msg) {
   // TODO: pop up alert message
+
+  alert(msg);
 }
 
 /** handleClick: handle click of column top to play piece */
 
 function handleClick(evt) {
   // get x from ID of clicked cell
-  var x = +evt.target.id;
+  const x = +evt.target.id;
 
   // get next spot in column (if none, ignore click)
-  var y = findSpotForCol(x);
+  const y = findSpotForCol(x);
   if (y === null) {
     return;
   }
@@ -91,8 +118,17 @@ function handleClick(evt) {
   // check for tie
   // TODO: check if all cells in board are filled; if so call, call endGame
 
+    const isBoardFilled = () => {
+      for(let section of board) {
+        const boardFilled = section.every(cell => {
+          return !cell === undefined && board[y][x] === currPlayer;
+        })
+        if(boardFilled) endGame();
+      }
+    }
+
   // switch players
-  // TODO: switch currPlayer 1 <-> 2
+  currPlayer = 1 ? currPlayer = 2 : currPlayer = 1;
 }
 
 /** checkForWin: check board cell-by-cell for "does a win start here?" */
