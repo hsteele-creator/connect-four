@@ -11,8 +11,6 @@ const HEIGHT = 6;
 let currPlayer = 1; // active player: 1 or 2
 const board = []; // array of rows, each row is array of cells  (board[y][x])
 
-const htmlBoard = document.querySelector("#board");
-
 /** makeBoard: create in-JS board structure:
  *    board = array of rows, each row is array of cells  (board[y][x])
  */
@@ -32,6 +30,7 @@ function makeBoard() {
 
 function makeHtmlBoard() {
 
+  const htmlBoard = document.querySelector("#board");
 
 
   //create the top table row with and id of column-top with an event listener that runs the handleClick function
@@ -48,7 +47,7 @@ function makeHtmlBoard() {
   }
   htmlBoard.append(top);
 
-  // create a row for each element of height on the board and in each row create a table cell for each element of width on the board with an id of the place it is on the grid and append the row with the cells to the board
+  // create a row for each column on the board and in each row create table cells for the rows
   for (let y = 0; y < HEIGHT; y++) {
     const row = document.createElement("tr");
     for (let x = 0; x < WIDTH; x++) {
@@ -62,10 +61,14 @@ function makeHtmlBoard() {
 
 /** findSpotForCol: given column x, return top empty y (null if filled) */
 
-function findSpotForCol(x) {
-  // TODO: write the real version of this, rather than always returning 0
-  return 0;
-}
+  function findSpotForCol(x) {
+    for (let y = HEIGHT - 1; y >= 0; y--) {
+      if (!board[y][x]) {
+        return y;
+      }
+    }
+    return null;
+  }
 
 /** placeInTable: update DOM to place piece into HTML table of board */
 
@@ -73,23 +76,16 @@ function placeInTable(y, x) {
   // TODO: make a div and insert into correct table cell
   const gamePiece = document.createElement("div");
   gamePiece.setAttribute("class", "piece");
+  gamePiece.classList.add(`p${currPlayer}`)
 
-  if(currPlayer = 1) {
-    gamePiece.classList.remove('p2')
-    gamePiece.classList.add('p1')
-  } else {
-    gamePiece.classList.remove('p1');
-    gamePiece.classList.add('p2');
+  const currentCell = document.getElementById(`${y}-${x}`)
+  currentCell.append(gamePiece);
   }
-  
-  htmlBoard[y][x].append(gamePiece);
 
-}
 
 /** endGame: announce game end */
 
 function endGame(msg) {
-  // TODO: pop up alert message
 
   alert(msg);
 }
@@ -107,8 +103,8 @@ function handleClick(evt) {
   }
 
   // place piece in board and add to HTML table
-  // TODO: add line to update in-memory board
   placeInTable(y, x);
+  board[y][x] = currPlayer;
 
   // check for win
   if (checkForWin()) {
@@ -118,17 +114,12 @@ function handleClick(evt) {
   // check for tie
   // TODO: check if all cells in board are filled; if so call, call endGame
 
-    const isBoardFilled = () => {
-      for(let section of board) {
-        const boardFilled = section.every(cell => {
-          return !cell === undefined && board[y][x] === currPlayer;
-        })
-        if(boardFilled) endGame();
-      }
-    }
+  if (board.every(row => row.every(cell => cell))) {
+    return endGame('The game has ended in a tie!');
+  }
 
   // switch players
-  currPlayer = 1 ? currPlayer = 2 : currPlayer = 1;
+  currPlayer = currPlayer === 1 ? 2 : 1;
 }
 
 /** checkForWin: check board cell-by-cell for "does a win start here?" */
@@ -151,13 +142,15 @@ function checkForWin() {
 
   // TODO: read and understand this code. Add comments to help you.
 
-  for (var y = 0; y < HEIGHT; y++) {
-    for (var x = 0; x < WIDTH; x++) {
-      var horiz = [[y, x], [y, x + 1], [y, x + 2], [y, x + 3]];
-      var vert = [[y, x], [y + 1, x], [y + 2, x], [y + 3, x]];
-      var diagDR = [[y, x], [y + 1, x + 1], [y + 2, x + 2], [y + 3, x + 3]];
-      var diagDL = [[y, x], [y + 1, x - 1], [y + 2, x - 2], [y + 3, x - 3]];
+  // loop through every cell check for a win horzintally, vertically, diagnol right, or diagnal left 
+  for (let y = 0; y < HEIGHT; y++) {
+    for (let x = 0; x < WIDTH; x++) {
+      const horiz = [[y, x], [y, x + 1], [y, x + 2], [y, x + 3]];
+      const vert = [[y, x], [y + 1, x], [y + 2, x], [y + 3, x]];
+      const diagDR = [[y, x], [y + 1, x + 1], [y + 2, x + 2], [y + 3, x + 3]];
+      const diagDL = [[y, x], [y + 1, x - 1], [y + 2, x - 2], [y + 3, x - 3]];
 
+      // if there is 4 in a row call check for win on the match
       if (_win(horiz) || _win(vert) || _win(diagDR) || _win(diagDL)) {
         return true;
       }
